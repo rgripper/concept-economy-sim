@@ -1,5 +1,3 @@
-pub mod lib;
-
 fn main() {
-    lib::run();
+    concept_economy_sim::run();
 }
