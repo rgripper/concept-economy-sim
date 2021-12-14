@@ -10,6 +10,7 @@ crate-type = ["cdylib", "rlib"]
 # Dependencies for all targets go here.
 [dependencies]
 wasm-bindgen = "0.2"
+rand = "0.8"
 
 # Dependencies for native only.
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
@@ -19,3 +20,4 @@ bevy = {version = "0.5", default-features = false, features = ["bevy_wgpu", "bev
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 bevy = {version = "0.5", default-features = false, features = ["bevy_winit", "render"]}
 bevy_webgl2 = "0.5"
+getrandom = { version = "0.2", features = ["js"] }
