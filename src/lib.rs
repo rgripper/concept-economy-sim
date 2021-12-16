@@ -4,6 +4,7 @@ mod game_items;
 mod position;
 mod village;
 mod worker_tasks;
+mod trees;
 
 use bevy::prelude::*;
 use wasm_bindgen::prelude::*;

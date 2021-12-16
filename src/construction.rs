@@ -1,4 +1,4 @@
-use bevy::prelude::Commands;
+use bevy::prelude::{Commands, Entity};
 
 use crate::{
     game_items::{GameItemKind, GameItemPile},
@@ -19,7 +19,7 @@ pub enum ConstructionKind {
     House,
 }
 
-pub fn spawn_construction_zone(commands: &mut Commands, position: &Position) {
+pub fn spawn_construction_zone(commands: &mut Commands, position: &Position) -> Entity {
     commands
         .spawn()
         .insert(ConstructionZone {
@@ -30,5 +30,6 @@ pub fn spawn_construction_zone(commands: &mut Commands, position: &Position) {
             }],
             items_ready: vec![],
         })
-        .insert(*position);
+        .insert(*position)
+        .id()
 }

@@ -1,15 +1,16 @@
-use std::{iter, thread};
+use std::collections::VecDeque;
 
 use bevy::{
     math::{Vec2, Vec3},
-    prelude::{AppBuilder, Commands, IntoSystem, Plugin, Res, SystemStage},
+    prelude::{AppBuilder, Commands, Entity, IntoSystem, Plugin, Query, Res, SystemStage, Without},
 };
 use rand::Rng;
 
 use crate::{
-    construction::{spawn_construction_zone, ConstructionZone},
+    construction::spawn_construction_zone,
     position::Position,
-    worker_tasks::{Carriage, Worker},
+    trees::spawn_tree,
+    worker_tasks::{Carriage, Worker, WorkerTask, WorkerTaskQue},
 };
 
 pub struct WorldParams {
@@ -27,7 +28,11 @@ impl Plugin for VillagePlugin {
     }
 }
 
-fn plan_houses(world_params: Res<WorldParams>, mut commands: Commands) {
+fn plan_houses(
+    world_params: Res<WorldParams>,
+    mut idle_workers: Query<Entity, Without<WorkerTaskQue>>,
+    mut commands: Commands,
+) {
     let mut rng = rand::thread_rng();
     let world_half = world_params.size / 2.0;
 
@@ -39,10 +44,32 @@ fn plan_houses(world_params: Res<WorldParams>, mut commands: Commands) {
         ))
     };
 
+    for _ in 0..20 {
+        spawn_tree(&mut commands, &gen_position());
+    }
+
     for _ in 0..world_params.villager_count {
         spawn_worker(&mut commands, &gen_position());
-        spawn_construction_zone(&mut commands, &gen_position());
+
+        let construction_zone_id = spawn_construction_zone(&mut commands, &gen_position());
+
+        plan_construction_zone(&mut commands, &mut idle_workers, construction_zone_id)
     }
+}
+
+fn plan_construction_zone(
+    commands: &mut Commands,
+    idle_workers: &mut Query<Entity, Without<WorkerTaskQue>>,
+    construction_zone_id: Entity,
+) {
+    let worker_id = idle_workers.iter().next().unwrap();
+    commands
+        .entity(worker_id)
+        .insert(WorkerTaskQue(VecDeque::from([
+            WorkerTask::CutTree,
+            WorkerTask::CarryResourceToConstruction(construction_zone_id),
+            WorkerTask::Construct(construction_zone_id),
+        ])));
 }
 
 fn spawn_worker(commands: &mut Commands, position: &Position) {
