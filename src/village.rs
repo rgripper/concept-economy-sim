@@ -2,7 +2,14 @@ use std::collections::VecDeque;
 
 use bevy::{
     math::{Vec2, Vec3},
-    prelude::{AppBuilder, Commands, Entity, IntoSystem, Plugin, Query, Res, SystemStage, Without},
+    prelude::{
+        AppBuilder, Color, Commands, Entity, IntoSystem, OrthographicCameraBundle, Plugin, Query,
+        Res, SystemStage, Transform, Without,
+    },
+};
+use bevy_prototype_lyon::{
+    prelude::{DrawMode, FillOptions, GeometryBuilder, ShapeColors, StrokeOptions},
+    shapes,
 };
 use rand::Rng;
 
@@ -14,8 +21,8 @@ use crate::{
 };
 
 pub struct WorldParams {
-    size: Vec2,
-    villager_count: u32,
+    pub size: Vec2,
+    pub villager_count: u32,
 }
 
 pub struct VillagePlugin;
@@ -28,11 +35,15 @@ impl Plugin for VillagePlugin {
     }
 }
 
+// TODO: this shoudl actually go to World init plugin
+
 fn plan_houses(
     world_params: Res<WorldParams>,
     mut idle_workers: Query<Entity, Without<WorkerTaskQue>>,
     mut commands: Commands,
 ) {
+    commands.spawn_bundle(OrthographicCameraBundle::new_2d());
+
     let mut rng = rand::thread_rng();
     let world_half = world_params.size / 2.0;
 
@@ -73,6 +84,25 @@ fn plan_construction_zone(
 }
 
 fn spawn_worker(commands: &mut Commands, position: &Position) {
+    let shape = shapes::RegularPolygon {
+        sides: 6,
+        feature: shapes::RegularPolygonFeature::Radius(200.0),
+        ..shapes::RegularPolygon::default()
+    };
+
+    commands.spawn_bundle(GeometryBuilder::build_as(
+        &shape,
+        ShapeColors::outlined(Color::TEAL, Color::BLACK),
+        DrawMode::Outlined {
+            fill_options: FillOptions::default(),
+            outline_options: StrokeOptions::default().with_line_width(10.0),
+        },
+        Transform {
+            translation: position.0,
+            ..Transform::default()
+        },
+    ));
+
     commands
         .spawn()
         .insert(Worker)
