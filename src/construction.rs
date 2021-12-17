@@ -1,4 +1,8 @@
-use bevy::prelude::{Commands, Entity};
+use bevy::prelude::{Color, Commands, Entity, Transform};
+use bevy_prototype_lyon::{
+    prelude::{DrawMode, FillOptions, GeometryBuilder, ShapeColors, StrokeOptions},
+    shapes,
+};
 
 use crate::{
     game_items::{GameItemKind, GameItemPile},
@@ -21,7 +25,22 @@ pub enum ConstructionKind {
 
 pub fn spawn_construction_zone(commands: &mut Commands, position: &Position) -> Entity {
     commands
-        .spawn()
+        .spawn_bundle(GeometryBuilder::build_as(
+            &shapes::Rectangle {
+                height: 20.0,
+                width: 20.0,
+                ..shapes::Rectangle::default()
+            },
+            ShapeColors::outlined(Color::NONE, Color::ORANGE),
+            DrawMode::Outlined {
+                fill_options: FillOptions::default(),
+                outline_options: StrokeOptions::default().with_line_width(1.0),
+            },
+            Transform {
+                translation: position.0,
+                ..Transform::default()
+            },
+        ))
         .insert(ConstructionZone {
             kind: ConstructionKind::House,
             items_needed: vec![GameItemPile {

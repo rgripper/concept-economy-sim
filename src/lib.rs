@@ -18,7 +18,7 @@ pub fn run() {
     let mut app = App::build();
 
     let world_params = WorldParams {
-        size: Vec2::new(200.0, 200.0),
+        size: Vec2::new(800.0, 800.0),
         villager_count: 4,
     };
     app.insert_resource(world_params);

@@ -3,7 +3,7 @@ use std::collections::VecDeque;
 use bevy::prelude::{AppBuilder, Commands, Entity, IntoSystem, Plugin, Query, With};
 
 use crate::{
-    bucket::{spawn_house, spawn_item_pile},
+    bucket::spawn_house,
     construction::ConstructionZone,
     game_items::{GameItemKind, GameItemPile},
     position::Position,
@@ -53,13 +53,11 @@ fn perform_task_by_worker(
         WorkerTask::CutTree => {
             let tree_id = trees.iter().next().unwrap();
             commands.entity(tree_id).despawn();
-            spawn_item_pile(
-                commands,
-                GameItemPile {
-                    kind: GameItemKind::WoodenLog,
-                    amount: 1,
-                },
-            );
+            let mut carriage = carriages.get_mut(worker_id).unwrap();
+            carriage.0.push(GameItemPile {
+                kind: GameItemKind::WoodenLog,
+                amount: 1,
+            });
         }
         WorkerTask::CarryResourceToConstruction(costruction_zone_id) => {
             let (mut zone, position) = construction_zones.get_mut(*costruction_zone_id).unwrap();
