@@ -1,0 +1,12 @@
+{
+  "name": "concept-economy-sim",
+  "version": "0.1.0",
+  "files": [
+    "concept_economy_sim_bg.wasm",
+    "concept_economy_sim.js",
+    "concept_economy_sim.d.ts"
+  ],
+  "module": "concept_economy_sim.js",
+  "types": "concept_economy_sim.d.ts",
+  "sideEffects": false
+}
