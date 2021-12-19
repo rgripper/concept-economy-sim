@@ -9,6 +9,7 @@ use crate::{
     position::Position,
 };
 
+#[derive(Debug)]
 pub struct ConstructionZone {
     pub items_needed: Vec<GameItemPile>,
     pub items_ready: Vec<GameItemPile>,
@@ -19,6 +20,7 @@ pub struct Construction {
     pub kind: ConstructionKind,
 }
 
+#[derive(Debug)]
 pub enum ConstructionKind {
     House,
 }

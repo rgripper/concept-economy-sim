@@ -16,7 +16,7 @@ use rand::Rng;
 use crate::{
     construction::spawn_construction_zone,
     position::Position,
-    trees::spawn_tree,
+    trees::{spawn_tree, Tree},
     worker_tasks::{Carriage, Worker, WorkerTask, WorkerTaskQue},
 };
 
@@ -66,6 +66,7 @@ fn plan_houses(
     world_params: Res<WorldParams>,
     mut commands: Commands,
     mut task_board: ResMut<TaskBoard>,
+    trees: Query<Entity, With<Tree>>,
 ) {
     let mut rng = rand::thread_rng();
     let world_half = world_params.size / 2.0;
@@ -78,10 +79,15 @@ fn plan_houses(
         ))
     };
 
+    let mut tree_iter = trees.iter();
+
     for _ in 0..world_params.villager_count {
         let construction_zone_id = spawn_construction_zone(&mut commands, &gen_position());
+
+        let tree_id = tree_iter.next().unwrap();
+
         task_board.0.push_back(WorkerTaskQue(VecDeque::from([
-            WorkerTask::CutTree,
+            WorkerTask::CutTree(tree_id),
             WorkerTask::CarryResourceToConstruction(construction_zone_id),
             WorkerTask::Construct(construction_zone_id),
         ])));
