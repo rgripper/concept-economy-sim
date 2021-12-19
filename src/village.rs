@@ -4,7 +4,7 @@ use bevy::{
     math::{Vec2, Vec3},
     prelude::{
         AppBuilder, Color, Commands, Entity, IntoSystem, OrthographicCameraBundle, Plugin, Query,
-        Res, SystemStage, Transform, Without,
+        Res, ResMut, SystemStage, Transform, With, Without,
     },
 };
 use bevy_prototype_lyon::{
@@ -31,9 +31,7 @@ impl Plugin for VillagePlugin {
     fn build(&self, app: &mut AppBuilder) {
         app.add_startup_stage("game_setup", SystemStage::single(init.system()));
         app.add_startup_stage("game_setup2", SystemStage::single(plan_houses.system()));
-
-        // app.add_system(assign_tasks.system());
-        // app.add_system(progress_with_tasks.system());
+        app.add_system(assign_tasks.system());
     }
 }
 
@@ -62,10 +60,12 @@ fn init(world_params: Res<WorldParams>, mut commands: Commands) {
     }
 }
 
+pub struct TaskBoard(pub VecDeque<WorkerTaskQue>);
+
 fn plan_houses(
     world_params: Res<WorldParams>,
-    mut idle_workers: Query<Entity, Without<WorkerTaskQue>>,
     mut commands: Commands,
+    mut task_board: ResMut<TaskBoard>,
 ) {
     let mut rng = rand::thread_rng();
     let world_half = world_params.size / 2.0;
@@ -80,24 +80,27 @@ fn plan_houses(
 
     for _ in 0..world_params.villager_count {
         let construction_zone_id = spawn_construction_zone(&mut commands, &gen_position());
-        plan_construction_zone(&mut commands, &mut idle_workers, construction_zone_id)
-    }
-}
-
-fn plan_construction_zone(
-    commands: &mut Commands,
-    idle_workers: &mut Query<Entity, Without<WorkerTaskQue>>,
-    construction_zone_id: Entity,
-) {
-    let worker_id = idle_workers.iter().next().unwrap();
-
-    commands
-        .entity(worker_id)
-        .insert(WorkerTaskQue(VecDeque::from([
+        task_board.0.push_back(WorkerTaskQue(VecDeque::from([
             WorkerTask::CutTree,
             WorkerTask::CarryResourceToConstruction(construction_zone_id),
             WorkerTask::Construct(construction_zone_id),
         ])));
+        // plan_construction_zone(&mut commands, &mut idle_workers, construction_zone_id)
+    }
+}
+
+fn assign_tasks(
+    mut commands: Commands,
+    mut idle_workers: Query<Entity, (With<Worker>, Without<WorkerTaskQue>)>,
+    mut task_board: ResMut<TaskBoard>,
+) {
+    for worker_id in idle_workers.iter_mut() {
+        if let Some(task_que) = task_board.0.pop_front() {
+            commands.entity(worker_id).insert(task_que);
+        } else {
+            break;
+        }
+    }
 }
 
 fn spawn_worker(commands: &mut Commands, position: &Position) {

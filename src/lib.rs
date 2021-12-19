@@ -6,9 +6,11 @@ mod trees;
 mod village;
 mod worker_tasks;
 
+use std::collections::VecDeque;
+
 use bevy::prelude::*;
 use bevy_prototype_lyon::plugin::ShapePlugin;
-use village::{VillagePlugin, WorldParams};
+use village::{TaskBoard, VillagePlugin, WorldParams};
 use wasm_bindgen::prelude::*;
 
 use crate::worker_tasks::WorkerPlugin;
@@ -22,6 +24,7 @@ pub fn run() {
         villager_count: 4,
     };
     app.insert_resource(world_params);
+    app.insert_resource(TaskBoard(VecDeque::new()));
 
     app.add_plugins(DefaultPlugins);
 

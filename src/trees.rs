@@ -31,5 +31,6 @@ pub fn spawn_tree(commands: &mut Commands, position: &Position) {
                 ..Transform::default()
             },
         ))
+        .insert(Tree)
         .insert(*position);
 }

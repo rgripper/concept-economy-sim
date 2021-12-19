@@ -12,6 +12,7 @@ use crate::{
 
 pub struct Worker;
 
+#[derive(Debug)]
 pub enum WorkerTask {
     CutTree,
     CarryResourceToConstruction(Entity),
@@ -22,20 +23,22 @@ pub struct Carriage(pub Vec<GameItemPile>);
 
 fn progress_with_tasks(
     mut commands: Commands,
-    workers: Query<(Entity, &WorkerTask)>,
+    mut workers: Query<(Entity, &mut WorkerTaskQue)>,
     mut construction_zones: Query<(&mut ConstructionZone, &Position)>,
     mut trees: Query<Entity, With<Tree>>,
     mut carriages: Query<&mut Carriage>,
 ) {
-    for (worker_id, task) in workers.iter() {
-        perform_task_by_worker(
-            worker_id,
-            task,
-            &mut commands,
-            &mut construction_zones,
-            &mut trees,
-            &mut carriages,
-        );
+    for (worker_id, mut task_que) in workers.iter_mut() {
+        if let Some(task) = task_que.0.pop_front() {
+            perform_task_by_worker(
+                worker_id,
+                &task,
+                &mut commands,
+                &mut construction_zones,
+                &mut trees,
+                &mut carriages,
+            );
+        }
     }
 
     // commands.entity(worker_id).remove::<VillagerAssignment>();
@@ -49,6 +52,7 @@ fn perform_task_by_worker(
     trees: &mut Query<Entity, With<Tree>>,
     carriages: &mut Query<&mut Carriage>,
 ) {
+    println!("perform_task_by_worker {:?}", task);
     match task {
         WorkerTask::CutTree => {
             let tree_id = trees.iter().next().unwrap();
