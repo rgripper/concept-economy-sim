@@ -15,3 +15,9 @@ wasm-pack build --target web --release
 ```
 npx serve .
 ```
+
+Deploying
+
+```
+npx gh-pages -d dist
+```

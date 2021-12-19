@@ -1,0 +1,14 @@
+{
+  "name": "concept-economy-sim",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:rgripper/concept-economy-sim.git",
+  "author": "Vladimir <azuresplash@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "deploy": "node dist.mjs && gh-pages -d dist"
+  },
+  "devDependencies": {
+    "gh-pages": "^3.2.3"
+  }
+}
